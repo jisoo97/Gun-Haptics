@@ -27,4 +27,29 @@ plot(data);
 plot(data(1:40));
 xlabel('Frequency');
 
+
+%%Transition
+%Direct Transition for now. 
+haptic_data = frequency;
+
+%%complemented data
+complement_data = haptic_data;
+for n=1:length(complement_data)
+    tmp = complement_data(n);
+    if (tmp>=40 && tmp<50)
+        complement_data(n)=tmp-10;
+    end
+end
+
 %%FFT reverse
+reversed_amplitude = fft(complement_data);
+for n=1:length(reversed_amplitude)
+    tmp = reversed_amplitude(n);
+    if (tmp>10000 || tmp < -10000)
+        reversed_amplitude(n)=0;
+    end
+end
+plot(T_vector,reversed_amplitude);
+%-symmetric problem
+
+
