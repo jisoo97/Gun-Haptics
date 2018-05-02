@@ -1,55 +1,36 @@
 %%Read audio file y= amplitude, fs = frequency
-[amplitude,Fs] = audioread('flashbang-1.wav');
-%sound(y,fs);  
+name = 'flashbang-1.wav';
+[amplitude,fs] = AudioRead(name);
 
 %%converting frequency to time
-T = 1/Fs;  %time
-L = length(amplitude); %length of signal
-T_vector = (0:L-1)*T;  %Time vector
+t_vector = GetTimeDomain(fs,amplitude);
 
-%%plot
-plot(T_vector,amplitude) %Time-Amplitude Graph
-xlabel('Seconds'); ylabel('Amplitude');
+%Time-Amplitude Graph
+DrawTimeAmpPlot(t_vector,amplitude);
 
 %%FFT
-frequency = abs(fft(amplitude));                                                                                          
-under_100 = frequency(frequency<100);
+fre_under_100 = FFT(amplitude,100); %35834
+%fre_under_n = FFT(amplitude,length(amplitude)); %36432
+%Thus negligiable
 
 %Frequency distiribution counting
-data = zeros(1, 100);
-for n=1:length(under_100)
-    tmp = under_100(n);
-    frequency_int = floor(tmp);
-    data(frequency_int + 1)= data(frequency_int+1)+1;
-end
+frequency_count = CountFrequency(fre_under_100,100);
 
-plot(data);
-plot(data(1:40));
-xlabel('Frequency');
+%Sound to Haptic Transition 
+haptic_data = SoundToHaptic(fre_under_100);
 
-
-%%Transition
-%Direct Transition for now. 
-haptic_data = frequency;
-
-%%complemented data
-complement_data = haptic_data;
-for n=1:length(complement_data)
-    tmp = complement_data(n);
-    if (tmp>=40 && tmp<50)
-        complement_data(n)=tmp-10;
-    end
-end
+%%Data complementation
+complement_data = HapticDataManipulation(haptic_data);
 
 %%FFT reverse
-reversed_amplitude = fft(complement_data);
+reversed_amplitude = ifft(complement_data);
 for n=1:length(reversed_amplitude)
     tmp = reversed_amplitude(n);
     if (tmp>10000 || tmp < -10000)
         reversed_amplitude(n)=0;
     end
 end
-plot(T_vector,reversed_amplitude);
-%-symmetric problem
+T = T_vector(1:length(reversed_amplitude));
+plot(T,reversed_amplitude);
 
 
